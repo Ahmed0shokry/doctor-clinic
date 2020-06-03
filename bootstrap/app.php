@@ -1,5 +1,8 @@
 <?php
 
+use Elasticsearch\Client;
+use Elasticsearch\ClientBuilder;
+
 require_once __DIR__.'/../vendor/autoload.php';
 
 (new Laravel\Lumen\Bootstrap\LoadEnvironmentVariables(
@@ -20,6 +23,7 @@ require_once __DIR__.'/../vendor/autoload.php';
 $app = new Laravel\Lumen\Application(
     dirname(__DIR__)
 );
+$app->register(Jenssegers\Mongodb\MongodbServiceProvider::class);
 
  $app->withFacades();
 
@@ -64,9 +68,9 @@ $app->singleton(
 //     'auth' => App\Http\Middleware\Authenticate::class,
 // ]);
 
-$app->middleware([
-    'authenticateAccess' => App\Http\Middleware\AuthenticateAccess::class,
-]);
+//$app->middleware([
+//    'authenticateAccess' => App\Http\Middleware\AuthenticateAccess::class,
+//]);
 /*
 |--------------------------------------------------------------------------
 | Register Service Providers
@@ -81,6 +85,17 @@ $app->middleware([
 // $app->register(App\Providers\AppServiceProvider::class);
 // $app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
+
+$app->configure('services');
+$app->configure('database');
+
+//$app->bind('AppCore\Domain\Repository\SearchRepository', 'AppCore\Persistence\ElasticSearchSectionsRepository');
+//$this->app->bind(SearchRepository::class, ElasticSearchSectionsRepository::class);
+$app->bind(Client::class, function () {
+    return ClientBuilder::create()
+        ->setHosts(config('services.search.hosts'))
+        ->build();
+});
 
 /*
 |--------------------------------------------------------------------------

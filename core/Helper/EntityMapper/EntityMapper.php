@@ -83,8 +83,7 @@ abstract class EntityMapper
      */
     protected static function handleRelations($record, $entity, $relations): void
     {
-        if(!empty($relations))
-        {
+        if(empty($relations)) return;
             foreach ($relations as $relationNameInDB => $value)
             {
                 if(is_string($value))
@@ -105,6 +104,5 @@ abstract class EntityMapper
 
                 }
             }
-        }
     }
 }
