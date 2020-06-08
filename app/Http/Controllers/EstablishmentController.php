@@ -27,10 +27,7 @@ class EstablishmentController extends Controller
 
     public function search(Request $request, EstablishmentSearch $repository)
     {
-        $sections = $repository->search([
-             'term' =>$request->all()['q'],
-             'sectionId' => $request->all()['sectionId']
-             ]);
+        $sections = $repository->search($request->all());
 
         return $this->success($sections);
     }

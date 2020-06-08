@@ -33,7 +33,7 @@ class EstablishmentSearch implements ISearchService
             'index' => $instance->getSearchIndex(),
             'type' => $instance->getSearchType(),
             //'body' => $this->getQueryBody($queryParameters['term']),
-            'body' => $this->searchByTermAndSectionFilter($queryParameters['term'],$queryParameters['sectionId']),
+            'body' => $this->searchByTermAndSectionFilter($queryParameters),
         ]);
 
         return $items;
@@ -55,16 +55,18 @@ class EstablishmentSearch implements ISearchService
             ],
         ];
     }
-    private function searchByTermAndSectionFilter($searchTerm, $sectionId) {
+    private function searchByTermAndSectionFilter($queryParameters) {
         return [
+            'size' => $queryParameters['size'],
+            'from' => $queryParameters['from'],
             'query' => [
                 'bool' => [
                     'must' => [
                         'match' => [
-                            'name' => ['query' => $searchTerm , "fuzziness" => "AUTO"]
+                            'name' => ['query' => $queryParameters['query'] , "fuzziness" => "AUTO"]
                         ],
                     ],
-                    'filter' => ['term'=> ['section._id' => $sectionId]]
+                    'filter' => ['term'=> ['section._id' => $queryParameters['sectionId']]]
                 ],
             ],
         ];
@@ -86,14 +88,16 @@ class EstablishmentSearch implements ISearchService
          * And we only care about the _source of the documents.
          */
         $hits = Arr::pluck($items['hits']['hits'], '_source') ?: [];
-
+        $total = $items['hits']['total']['value'];
+        $hitsWithTotal = (!empty($hits))?
+            array_merge(['items' => $hits], ['total' => $total]) : [];
 //        $sources = array_map(function ($source) {
 //            $source['tags'] = json_encode($source['tags']);
 //            return $source;
 //        }, $hits);
 
         // We have to convert the results array into Eloquent Models.
-        return Establishment::hydrate($hits);
+        return Establishment::hydrate($hitsWithTotal);
     }
 
 }
