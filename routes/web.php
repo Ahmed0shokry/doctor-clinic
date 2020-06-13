@@ -16,5 +16,6 @@ $router->get('/', function () use ($router) {
 });
 
 //$router->get('search', 'SectionController@search');
+$router->get('doctor/search', 'DoctorController@search');
 $router->get('search', 'EstablishmentController@search');
 $router->get('a', 'SectionController@index');
