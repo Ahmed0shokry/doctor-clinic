@@ -36,41 +36,15 @@ class DoctorSearch implements ISearchService
 
         return $items;
     }
-
     private function getSearchQuery($queryParameters) {
-//        $queryToSearchByName = [
-//            'size' => $queryParameters['size'],
-//            'from' => $queryParameters['from'],
-//            'query' => [
-//                'bool' => [
-//                    'must' => [
-//                        'match' => [
-//                            'name' => ['query' => $queryParameters['query'] , "fuzziness" => "AUTO"]
-//                        ],
-//                    ],
-//                ],
-//            ],
-//        ];
 
-        $queryToSearchByName = [
-            'size' => $queryParameters['size'],
-            'from' => $queryParameters['from'],
-            'query' => [
-                'bool' => [
-                    'must' => [
-                        'match' => [
-                            'name' => ['query' => $queryParameters['query'] , "fuzziness" => "AUTO"]
-                        ]
-                    ]
-                ],
-            ],
-        ];
-
-        if(isset($queryParameters['speciality']))
-        {
-            $this->setSpecialityFilter($queryToSearchByName, $queryParameters);
-        }
-        return $queryToSearchByName;
+        $query = [];
+        $this->setPaginationParams($queryParameters, $query);
+        $this->setQuerySearchSkelton();
+        if(!$this->areThereConditionsToSearch($queryParameters)) return  $this->getAllItems($query);
+        if(isset($queryParameters['query'])) $this->setSearchTerm($queryParameters, $query);
+        if(isset($queryParameters['speciality'])) $this->setSpecialityFilter($query, $queryParameters);
+        return $query;
     }
     private function setSpecialityFilter($queryToSearchByName, $queryParameters) {
 
@@ -103,6 +77,54 @@ class DoctorSearch implements ISearchService
 
         // We have to convert the results array into Eloquent Models.
         return Doctor::hydrate($hitsWithTotal);
+    }
+
+    /**
+     * @param $queryParameters
+     * @param array $query
+     */
+    private function setPaginationParams($queryParameters, array $query): void
+    {
+        $query['size'] = 10;
+        //$query['size'] = $queryParameters['size'];
+        $query['from'] = $queryParameters['from'];
+    }
+
+    private function setQuerySearchSkelton(): void
+    {
+        $query = ['query' => ['bool' => []]];
+    }
+
+    /**
+     * @param $queryParameters
+     * @param array $query
+     */
+    private function setSearchTerm($queryParameters, array $query): void
+    {
+        $query['query']['bool']['must'] = [
+            'match' => [
+                'name' => ['query' => $queryParameters, "fuzziness" => "AUTO"]
+            ]
+        ];
+    }
+
+    /**
+     * @param array $query
+     * @return array
+     */
+    private function getAllItems(array $query): array
+    {
+        $query['query']['match_all'] = (object)[];
+        return $query;
+    }
+
+    /**
+     * @param $queryParameters
+     * @return bool
+     */
+    private function areThereConditionsToSearch($queryParameters): bool
+    {
+        return isset($queryParameters['query']) || isset($queryParameters['speciality']);
     }
 
 }
