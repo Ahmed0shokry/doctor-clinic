@@ -61,22 +61,20 @@ class DoctorSearch implements ISearchService
                         'match' => [
                             'name' => ['query' => $queryParameters['query'] , "fuzziness" => "AUTO"]
                         ]
-                    ],
-                    'filter' => [
-                        'term' => ['specialities' => $queryParameters['speciality']]
                     ]
                 ],
             ],
         ];
 
-//        if(isset($queryParameters['speciality']))
-//        {
-//            $this->setSpecialityFilter($queryToSearchByName, $queryParameters);
-//        }
+        if(isset($queryParameters['speciality']))
+        {
+            $this->setSpecialityFilter($queryToSearchByName, $queryParameters);
+        }
         return $queryToSearchByName;
     }
     private function setSpecialityFilter($queryToSearchByName, $queryParameters) {
-        $queryToSearchByName['query']['bool']['must'] = ['term'=> ['specialities' => $queryParameters['speciality']]];
+
+        $queryToSearchByName['query']['bool']['filter'] = ['term'=> ['specialities' => $queryParameters['speciality']]];
     }
 
     private function buildCollection(array $items): Collection
