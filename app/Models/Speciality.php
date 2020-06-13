@@ -11,6 +11,18 @@ class Speciality extends Model
 
     protected $connection = 'mongodb';
     protected $collection = 'specialities';
+    public static $indexName = 'specialities';
     protected $primaryKey = '_id';
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'alias'];
+
+    public static function getMappingProperties(){
+        return [
+            'name' => [
+                'type' => 'keyword',
+            ],
+            'alias' => [
+                'type' => 'keyword',
+            ]
+        ];
+    }
 }

@@ -11,6 +11,7 @@ class City extends Model
 
     protected $connection = 'mongodb';
     protected $collection = 'cities';
+    public static $indexName = 'cities';
     protected $primaryKey = '_id';
     protected $fillable = ['name', 'country_id'];
 
@@ -23,5 +24,15 @@ class City extends Model
         return $this->hasMany(Area::class);
     }
 
-
+    public static function getMappingProperties(){
+        return [
+            'name' => [
+                'type' => 'text',
+                'analyzer' => 'standard'
+            ],
+            'country_id' => [
+                'type' => 'text',
+            ]
+        ];
+    }
 }

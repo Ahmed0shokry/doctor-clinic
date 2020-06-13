@@ -11,6 +11,18 @@ class Keyword extends Model
 
     protected $connection = 'mongodb';
     protected $collection = 'keywords';
+    public static $indexName = 'keywords';
     protected $primaryKey = '_id';
     protected $fillable = ['name', 'alias'];
+
+    public static function getMappingProperties(){
+        return [
+            'name' => [
+                'type' => 'keyword',
+            ],
+            'alias' => [
+                'type' => 'keyword',
+            ],
+        ];
+    }
 }

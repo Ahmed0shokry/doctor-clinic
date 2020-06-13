@@ -31,7 +31,7 @@ class EstablishmentSearch implements ISearchService
         $instance = new Establishment();
         $items = $this->search->search([
             'index' => $instance->getSearchIndex(),
-            'type' => $instance->getSearchType(),
+//            'type' => $instance->getSearchType(),
             //'body' => $this->getQueryBody($queryParameters['term']),
             'body' => $this->searchByTermAndSectionFilter($queryParameters),
         ]);
@@ -60,10 +60,12 @@ class EstablishmentSearch implements ISearchService
             'size' => $queryParameters['size'],
             'from' => $queryParameters['from'],
             'query' => [
+//                'match_all'=>(object)[],
                 'bool' => [
                     'must' => [
                         'match' => [
                             'name' => ['query' => $queryParameters['query'] , "fuzziness" => "AUTO"]
+                            //'name' => ['query' => '' , 'fuzziness' => 'AUTO']
                         ],
                     ],
                     'filter' => ['term'=> ['section._id' => $queryParameters['sectionId']]]

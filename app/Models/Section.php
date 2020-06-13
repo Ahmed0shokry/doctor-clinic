@@ -11,11 +11,23 @@ class Section extends Model
 
     protected $connection = 'mongodb';
     protected $collection = 'sections';
+    public static $indexName = 'sections';
     protected $primaryKey = '_id';
     protected $fillable = ['name', 'alias'];
     public function establishments()
     {
         return $this->hasMany(Establishment::class);
+    }
+
+    public static function getMappingProperties(){
+        return [
+            'name' => [
+                'type' => 'keyword',
+            ],
+            'alias' => [
+                'type' => 'keyword',
+            ]
+        ];
     }
 
 }

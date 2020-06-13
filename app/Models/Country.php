@@ -11,6 +11,7 @@ class Country extends Model
 
     protected $connection = 'mongodb';
     protected $collection = 'countries';
+    public static $indexName = 'countries';
     protected $primaryKey = '_id';
     protected $fillable = ['name'];
 
@@ -23,4 +24,12 @@ class Country extends Model
         return $this->hasMany(Establishment::class, 'branches.country._id', '_id');
     }
 
+    public static function getMappingProperties(){
+        return [
+            'name' => [
+                'type' => 'text',
+                'analyzer' => 'standard'
+            ]
+        ];
+    }
 }

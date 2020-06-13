@@ -86,14 +86,20 @@ class ReindexDB extends Command
      */
     private function indexSingleModel($model): void
     {
+        //just message
         $modelName = $model['name'];
         $this->info("Indexing $modelName model. wait a while...");
 
-        $modelFullNameSpace = $this->getModelFullNamespace($model, $modelName);
+        //prepare index data and rebuild it with new criteria (mappings)
+        list($modelFullNameSpace, $indexName, $indexParams) = $this->prepareIndexData($model, $modelName);
+        $this->deleteIndexIfExists($indexName);
+        $this->createIndexAgainWithNewMappings($indexParams);
+
+
         foreach ($modelFullNameSpace::get() as $modelData) {
             $this->client->index([
                 'index' => $modelData->getSearchIndex(),
-                'type' => $modelData->getSearchType(),
+                //'type' => $modelData->getSearchType(),
                 'id' => $modelData->id,
                 'body' => $this->toSearchableArray($modelData->toSearchArray()),
             ]);
@@ -123,5 +129,70 @@ class ReindexDB extends Command
     {
         $pathWithBackwardSlash = str_replace('/', '\\', $model['path']);
         return "App\\" . $pathWithBackwardSlash . "\\" . $modelName;
+    }
+
+    /**
+     * @param $index
+     * @return bool
+     */
+    private function isIndexExists($index): bool
+    {
+        return $this->client->indices()->exists(['index' => $index]);
+    }
+
+    /**
+     * @param $index
+     * @param $indexMappingProperties
+     * @return array
+     */
+    private function getIndexArrangedParameters($index, $indexMappingProperties): array
+    {
+        return [
+            'index' => $index,
+            'body' => [
+                'settings' => [
+                    'number_of_shards' => 3,
+                    'number_of_replicas' => 2
+                ],
+                'mappings' => [
+                    '_source' => [
+                        'enabled' => true
+                    ],
+                   'properties' => $indexMappingProperties
+                ]
+            ]
+        ];
+    }
+
+    /**
+     * @param $model
+     * @param $modelName
+     * @return array
+     */
+    private function prepareIndexData($model, $modelName): array
+    {
+        $modelFullNameSpace = $this->getModelFullNamespace($model, $modelName);
+        $indexName = $modelFullNameSpace::$indexName;
+        $indexMappingProperties = $modelFullNameSpace::getMappingProperties();
+        $indexParams = $this->getIndexArrangedParameters($indexName, $indexMappingProperties);
+        return array($modelFullNameSpace, $indexName, $indexParams);
+    }
+
+    /**
+     * @param $indexName
+     */
+    private function deleteIndexIfExists($indexName): void
+    {
+        if ($this->isIndexExists($indexName)) {
+            $this->client->indices()->delete(['index' => $indexName]);
+        }
+    }
+
+    /**
+     * @param $indexParams
+     */
+    private function createIndexAgainWithNewMappings($indexParams): void
+    {
+        $this->client->indices()->create($indexParams);
     }
 }
