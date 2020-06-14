@@ -18,4 +18,10 @@ $router->get('/', function () use ($router) {
 //$router->get('search', 'SectionController@search');
 $router->get('doctor/search', 'DoctorController@search');
 $router->get('search', 'EstablishmentController@search');
+$router->get('specialities', function() {
+    return \App\Models\Speciality::all();
+});
+$router->get('sections', function() {
+    return \App\Models\Section::all();
+});
 $router->get('a', 'SectionController@index');
