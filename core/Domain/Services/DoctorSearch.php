@@ -125,7 +125,7 @@ class DoctorSearch implements ISearchService
     }
 
     private function setSpecialityFilter ($queryParameters, array & $query) {
-        $query['query']['bool']['filter'] = ['term'=> ['specialities' => $queryParameters['speciality']]];
+        $query['query']['bool']['filter'][] = ['term'=> ['specialities' => $queryParameters['speciality']]];
     }
 
     private function buildCollection(array $items): Collection
