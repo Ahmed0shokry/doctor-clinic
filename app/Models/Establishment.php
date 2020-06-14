@@ -17,7 +17,7 @@ class Establishment extends Model
         'name',
         'biography',
         'section',
-        'specialises',
+        'specialities',
         'phones',
         'keywords',
         'social_contacts',
@@ -43,7 +43,7 @@ class Establishment extends Model
                 'type' => 'text',
                 'analyzer' => 'standard'
             ],
-            'specialises' => [
+            'specialities' => [
                 'type' => 'keyword',
             ],
             'phones' => [

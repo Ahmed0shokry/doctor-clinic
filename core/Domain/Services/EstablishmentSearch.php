@@ -25,53 +25,126 @@ class EstablishmentSearch implements ISearchService
         return $this->buildCollection($items);
     }
 
+
+
+
     private function searchOnElasticsearch($queryParameters): array
     {
         //todo : each technique like (autocomplete , match_phrase and so on ) depends on the situation
         $instance = new Establishment();
-        $items = $this->search->search([
+        return $this->search->search([
             'index' => $instance->getSearchIndex(),
-//            'type' => $instance->getSearchType(),
-            //'body' => $this->getQueryBody($queryParameters['term']),
-            'body' => $this->searchByTermAndSectionFilter($queryParameters),
+            'body' => $this->getSearchQuery($queryParameters),
         ]);
+    }
+    private function getSearchQuery($queryParameters) {
 
-        return $items;
+        $query = [];
+        $this->setPaginationParams($queryParameters, $query);
+        $this->setQuerySearchSkeleton();
+        $this->setSearchConditions($queryParameters, $query);
+        return $query;
+    }
+    /**
+     * @param $queryParameters
+     * @param array $query
+     */
+    private function setPaginationParams($queryParameters,array & $query): void
+    {
+        $query['size'] = 10;
+        //$query['size'] = $queryParameters['size'];
+        $query['from'] = $queryParameters['from'];
+    }
+
+    private function setQuerySearchSkeleton(): void
+    {
+        $query = ['query' => ['bool' => []]];
     }
 
     /**
-     * @param string $searchTerm
-     * @return \array[][]
+     * @param $queryParameters
+     * @param array $query
      */
-    private function getQueryBody(string $searchTerm): array
+    private function setSearchConditions($queryParameters, array & $query): void
     {
-        return [
-            'query' => [
-                'multi_match' => [
-                    'fields' => ['name'],
-                    'query' => $searchTerm,
-                    "fuzziness" => "AUTO",
-                ],
-            ],
+        if (!$this->areThereConditionsToSearch($queryParameters)) {
+            $this->getAllItems($query);
+            return;
+        }
+        if ($this->isTermSearchExists($queryParameters))
+            $this->setSearchTerm($queryParameters, $query);
+        if ($this->isSectionIdFilterExists($queryParameters))
+            $this->setSectionIdFilter($queryParameters, $query);
+        if ($this->isSpecialityFilterExists($queryParameters))
+            $this->setSpecialityFilter($queryParameters, $query);
+//        dd($query);
+    }
+
+    /**
+     * @param $queryParameters
+     * @return bool
+     */
+    private function areThereConditionsToSearch($queryParameters): bool
+    {
+        return $this->isTermSearchExists($queryParameters)
+            || $this->isSectionIdFilterExists($queryParameters)
+            || $this->isSpecialityFilterExists($queryParameters);
+    }
+
+    /**
+     * @param $queryParameters
+     * @return bool
+     */
+    private function isTermSearchExists($queryParameters): bool
+    {
+        return isset($queryParameters['query']) && !empty($queryParameters['query']);
+    }
+
+    /**
+     * @param $queryParameters
+     * @return bool
+     */
+    private function isSectionIdFilterExists($queryParameters): bool
+    {
+        return isset($queryParameters['sectionId']) && !empty($queryParameters['sectionId']);
+    }
+
+    /**
+     * @param $queryParameters
+     * @return bool
+     */
+    private function isSpecialityFilterExists($queryParameters): bool
+    {
+        return isset($queryParameters['speciality']) && !empty($queryParameters['speciality']);
+    }
+    /**
+     * @param array $query
+     * @return array
+     */
+    private function getAllItems(array & $query): array
+    {
+        $query['query']['match_all'] = (object)[];
+        return $query;
+    }
+
+    /**
+     * @param $queryParameters
+     * @param array $query
+     */
+    private function setSearchTerm($queryParameters, array & $query): void
+    {
+        $query['query']['bool']['must'] = [
+            'match' => [
+                'name' => ['query' => $queryParameters['query'], "fuzziness" => "AUTO"]
+            ]
         ];
     }
-    private function searchByTermAndSectionFilter($queryParameters) {
-        return [
-            'size' => $queryParameters['size'],
-            'from' => $queryParameters['from'],
-            'query' => [
-//                'match_all'=>(object)[],
-                'bool' => [
-                    'must' => [
-                        'match' => [
-                            'name' => ['query' => $queryParameters['query'] , "fuzziness" => "AUTO"]
-                            //'name' => ['query' => '' , 'fuzziness' => 'AUTO']
-                        ],
-                    ],
-                    'filter' => ['term'=> ['section._id' => $queryParameters['sectionId']]]
-                ],
-            ],
-        ];
+
+    private function setSectionIdFilter ($queryParameters, array & $query) {
+        $query['query']['bool']['filter'][] = ['term'=>['section._id' => $queryParameters['sectionId']]];
+    }
+    private function setSpecialityFilter ($queryParameters, array & $query) {
+        $query['query']['bool']['filter'][] = ['term'=>['specialities' => $queryParameters['speciality']]];
     }
 
     private function buildCollection(array $items): Collection
