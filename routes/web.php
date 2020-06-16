@@ -18,6 +18,7 @@ $router->get('/', function () use ($router) {
 //$router->get('search', 'SectionController@search');
 $router->get('doctor/search', 'DoctorController@search');
 $router->get('search', 'EstablishmentController@search');
+$router->get('single-establishment', 'EstablishmentController@singleEstablishment');
 $router->get('specialities', function() {
     return \App\Models\Speciality::all();
 });

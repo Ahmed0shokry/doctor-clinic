@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\Establishment;
 use App\Models\Section;
 use App\Traits\ApiResponser;
 use AppCore\Domain\Services\EstablishmentSearch;
@@ -28,8 +29,12 @@ class EstablishmentController extends Controller
     public function search(Request $request, EstablishmentSearch $repository)
     {
         $sections = $repository->search($request->all());
-
         return $this->success($sections);
+    }
+
+    public function singleEstablishment(Request $request) {
+        $establishment = Establishment::where('slug', $request->all()['slug'])->first();
+        return $this->success($establishment);
     }
 
     /**
