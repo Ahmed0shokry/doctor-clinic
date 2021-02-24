@@ -77,6 +77,14 @@ class EstablishmentSearch implements ISearchService
             $this->setSectionIdFilter($queryParameters, $query);
         if ($this->isSpecialityFilterExists($queryParameters))
             $this->setSpecialityFilter($queryParameters, $query);
+        if ($this->isGenderFilterExists($queryParameters))
+            $this->setGenderFilter($queryParameters, $query);
+        if ($this->isCountryFilterExists($queryParameters))
+            $this->setCountryFilter($queryParameters, $query);
+        if ($this->isCityFilterExists($queryParameters))
+            $this->setCityFilter($queryParameters, $query);
+        if ($this->isAreaFilterExists($queryParameters))
+            $this->setAreaFilter($queryParameters, $query);
 //        dd($query);
     }
 
@@ -88,7 +96,11 @@ class EstablishmentSearch implements ISearchService
     {
         return $this->isTermSearchExists($queryParameters)
             || $this->isSectionIdFilterExists($queryParameters)
-            || $this->isSpecialityFilterExists($queryParameters);
+            || $this->isSpecialityFilterExists($queryParameters)
+            || $this->isGenderFilterExists($queryParameters)
+            || $this->isCountryFilterExists($queryParameters)
+            || $this->isCityFilterExists($queryParameters)
+            || $this->isAreaFilterExists($queryParameters);
     }
 
     /**
@@ -117,6 +129,43 @@ class EstablishmentSearch implements ISearchService
     {
         return isset($queryParameters['speciality']) && !empty($queryParameters['speciality']);
     }
+
+    /**
+     * @param $queryParameters
+     * @return bool
+     */
+    private function isGenderFilterExists($queryParameters): bool
+    {
+        return isset($queryParameters['gender']) && !empty($queryParameters['gender']);
+    }
+
+    /**
+     * @param $queryParameters
+     * @return bool
+     */
+    private function isCountryFilterExists($queryParameters): bool
+    {
+        return isset($queryParameters['country']) && !empty($queryParameters['country']);
+    }
+
+    /**
+     * @param $queryParameters
+     * @return bool
+     */
+    private function isCityFilterExists($queryParameters): bool
+    {
+        return isset($queryParameters['city']) && !empty($queryParameters['city']);
+    }
+
+    /**
+     * @param $queryParameters
+     * @return bool
+     */
+    private function isAreaFilterExists($queryParameters): bool
+    {
+        return isset($queryParameters['area']) && !empty($queryParameters['area']);
+    }
+
     /**
      * @param array $query
      * @return array
@@ -147,6 +196,21 @@ class EstablishmentSearch implements ISearchService
         $query['query']['bool']['filter'][] = ['term'=>['specialities' => $queryParameters['speciality']]];
     }
 
+    private function setGenderFilter($queryParameters, array & $query) {
+        $query['query']['bool']['filter'][] = ['term'=>['gender' => $queryParameters['gender']]];
+    }
+
+    private function setCountryFilter($queryParameters, array & $query) {
+        $query['query']['bool']['filter'][] = ['term'=>['branches.country.id' => $queryParameters['country']]];
+    }
+
+    private function setCityFilter($queryParameters, array & $query) {
+        $query['query']['bool']['filter'][] = ['term'=>['branches.city.id' => $queryParameters['city']]];
+    }
+
+    private function setAreaFilter($queryParameters, array & $query) {
+        $query['query']['bool']['filter'][] = ['term'=>['branches.area.id' => $queryParameters['area']]];
+    }
     private function buildCollection(array $items): Collection
     {
         /**

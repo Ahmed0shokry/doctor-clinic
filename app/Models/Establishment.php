@@ -39,6 +39,9 @@ class Establishment extends Model
                 'type' => 'text',
                 'analyzer' => 'standard'
             ],
+            'gender' => [
+                'type' => 'keyword',
+            ],
             'biography' => [
                 'type' => 'text',
                 'analyzer' => 'standard'
@@ -46,17 +49,8 @@ class Establishment extends Model
             'specialities' => [
                 'type' => 'keyword',
             ],
-            'phones' => [
-                //'type' => 'double',
-            ],
             'keywords' => [
                 'type' => 'keyword',
-            ],
-            'country_id' => [
-                'type' => 'text',
-            ],
-            'city_id'  => [
-                'type' => 'text',
             ],
             'slug'  => [
                 'type' => 'text',
@@ -65,8 +59,50 @@ class Establishment extends Model
             ],
             'social_contacts' => [
             ],
-            'branches' => [
-            ]
+//            'branches' => [
+//                    'type' => 'nested',
+//                    'properties' => [
+//                        //'phones' => [],
+//                        //'price' => '',
+//                        'country' => [
+//                            'type' => 'nested',
+//                            'properties' => [
+//                                'id' => [
+//                                    'type' => 'keyword',
+//                                ],
+//                                'name' => [
+//                                    'type' => 'keyword',
+//                                ],
+//                            ]
+//                        ],
+//                        'city' => [
+//                            'type' => 'nested',
+//                            'properties' => [
+//                                'id' => [
+//                                    'type' => 'keyword',
+//                                ],
+//                                'name' => [
+//                                    'type' => 'keyword',
+//                                ],
+//                            ]
+//                        ],
+//                        'area' => [
+//                            'type' => 'nested',
+//                            'properties' => [
+//                                'id' => [
+//                                    'type' => 'keyword',
+//                                ],
+//                                'name' => [
+//                                    'type' => 'keyword',
+//                                ],
+//                            ]
+//                        ],
+//                        //'address' => '',
+//                        //'latitude' => '',
+//                        //'longitude' => '',
+//                        //'appointments' => [],
+//                    ]
+//                ]
         ];
     }
 }
